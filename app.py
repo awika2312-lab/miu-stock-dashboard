@@ -7,7 +7,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title(" Miu Stock Dashboard")
+st.title("📊 Miu Stock Dashboard")
 
 symbols = ["NVDA", "RKLB"]
 
