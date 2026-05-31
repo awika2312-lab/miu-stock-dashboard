@@ -38,6 +38,8 @@ for symbol in symbols:
     overview = get_overview(symbol)
     quote = get_quote(symbol)
 
+st.write(symbol, quote)
+
     quote_data = quote.get("Global Quote", {})
 
     price = quote_data.get("05. price", "N/A")
@@ -60,3 +62,4 @@ st.dataframe(
     use_container_width=True,
     hide_index=True
 )
+
