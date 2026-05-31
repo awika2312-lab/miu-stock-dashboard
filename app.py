@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import requests
 
 st.set_page_config(
     page_title="Miu Stock Dashboard",
@@ -8,14 +9,37 @@ st.set_page_config(
 
 st.title("📊 Miu Stock Dashboard")
 
-df = pd.DataFrame({
-    "Ticker": ["NVDA", "RKLB"],
-    "Company": [
-        "NVIDIA Corporation",
-        "Rocket Lab USA Inc."
-    ],
-    "Price": [100.00, 10.00]
-})
+API_KEY = st.secrets["ALPHA_VANTAGE_KEY"]
+
+def get_overview(symbol):
+
+    url = (
+        f"https://www.alphavantage.co/query"
+        f"?function=OVERVIEW"
+        f"&symbol={symbol}"
+        f"&apikey={API_KEY}"
+    )
+
+    return requests.get(url).json()
+
+
+symbols = ["NVDA", "RKLB"]
+
+rows = []
+
+for symbol in symbols:
+
+    data = get_overview(symbol)
+
+    rows.append({
+        "Ticker": symbol,
+        "Company": data.get("Name", "N/A"),
+        "Market Cap": data.get("MarketCapitalization", "N/A"),
+        "P/E": data.get("PERatio", "N/A"),
+        "P/S": data.get("PriceToSalesRatioTTM", "N/A")
+    })
+
+df = pd.DataFrame(rows)
 
 st.dataframe(
     df,
