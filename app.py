@@ -7,25 +7,33 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("📊 Miu Stock Dashboard")
+st.title("🚀 YFINANCE TEST")
 
 symbols = ["NVDA", "RKLB"]
 
 rows = []
 
 for symbol in symbols:
+    try:
+        stock = yf.Ticker(symbol)
+        info = stock.info
 
-    stock = yf.Ticker(symbol)
+        rows.append({
+            "Ticker": symbol,
+            "Company": info.get("longName", "N/A"),
+            "Price": info.get("currentPrice", info.get("regularMarketPrice", "N/A")),
+            "Market Cap": info.get("marketCap", "N/A"),
+            "P/E": info.get("trailingPE", "N/A"),
+        })
 
-    info = stock.info
-
-    rows.append({
-        "Ticker": symbol,
-        "Company": info.get("longName", "N/A"),
-        "Price": info.get("currentPrice", "N/A"),
-        "Market Cap": info.get("marketCap", "N/A"),
-        "P/E": info.get("trailingPE", "N/A")
-    })
+    except Exception as e:
+        rows.append({
+            "Ticker": symbol,
+            "Company": f"ERROR: {e}",
+            "Price": "N/A",
+            "Market Cap": "N/A",
+            "P/E": "N/A",
+        })
 
 df = pd.DataFrame(rows)
 
