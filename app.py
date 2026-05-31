@@ -1,63 +1,94 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
+from pathlib import Path
 
 st.set_page_config(
     page_title="Miu Stock Dashboard",
     layout="wide"
 )
 
-# =========================
-# THEME
-# =========================
-
 st.markdown("""
 <style>
-
 .stApp {
     background-color: #0E1117;
 }
-
-h1 {
-    color: white;
-    font-weight: 700;
-}
-
-[data-testid="stDataFrame"] {
-    border-radius: 10px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# HEADER
-# =========================
-
 st.title("Miu Stock Dashboard")
-
 st.caption(
     "Real-Time Market Data • Technical Analysis • Portfolio Tracking"
 )
 
-# =========================
-# SYMBOL INPUT
-# =========================
+WATCHLIST_FILE = "watchlist.csv"
 
-symbol_input = st.text_input(
-    "Symbols",
-    "NVDA,RKLB"
+# =====================
+# LOAD WATCHLIST
+# =====================
+
+if not Path(WATCHLIST_FILE).exists():
+
+    pd.DataFrame({
+        "Ticker": ["NVDA", "RKLB"]
+    }).to_csv(
+        WATCHLIST_FILE,
+        index=False
+    )
+
+watchlist_df = pd.read_csv(
+    WATCHLIST_FILE
 )
 
-symbols = [
-    s.strip().upper()
-    for s in symbol_input.split(",")
-    if s.strip()
-]
+symbols = (
+    watchlist_df["Ticker"]
+    .dropna()
+    .astype(str)
+    .str.upper()
+    .tolist()
+)
 
-# =========================
-# DATA COLLECTION
-# =========================
+# =====================
+# ADD SYMBOL
+# =====================
+
+col1, col2 = st.columns([3,1])
+
+with col1:
+
+    new_symbol = st.text_input(
+        "Add Symbol",
+        placeholder="AAPL"
+    )
+
+with col2:
+
+    add_clicked = st.button(
+        "Add"
+    )
+
+if add_clicked and new_symbol:
+
+    new_symbol = new_symbol.upper()
+
+    if new_symbol not in symbols:
+
+        symbols.append(
+            new_symbol
+        )
+
+        pd.DataFrame({
+            "Ticker": symbols
+        }).to_csv(
+            WATCHLIST_FILE,
+            index=False
+        )
+
+        st.rerun()
+
+# =====================
+# STOCK TABLE
+# =====================
 
 rows = []
 
@@ -67,7 +98,9 @@ for symbol in symbols:
 
         stock = yf.Ticker(symbol)
 
-        hist = stock.history(period="1y")
+        hist = stock.history(
+            period="1y"
+        )
 
         if len(hist) < 200:
             continue
@@ -84,34 +117,43 @@ for symbol in symbols:
 
         daily_return = round(
             (
-                (current_price - previous_price)
-                / previous_price
-            ) * 100,
+                current_price
+                - previous_price
+            )
+            /
+            previous_price
+            * 100,
             2
         )
 
         one_year_return = round(
             (
-                (hist["Close"].iloc[-1]
-                 - hist["Close"].iloc[0])
-                / hist["Close"].iloc[0]
-            ) * 100,
+                hist["Close"].iloc[-1]
+                - hist["Close"].iloc[0]
+            )
+            /
+            hist["Close"].iloc[0]
+            * 100,
             2
         )
 
         current_year = hist[
-            hist.index.year ==
+            hist.index.year
+            ==
             pd.Timestamp.now().year
         ]
 
-        if len(current_year) > 0:
+        if len(current_year):
 
             ytd_return = round(
                 (
-                    (current_price
-                     - current_year["Close"].iloc[0])
-                    / current_year["Close"].iloc[0]
-                ) * 100,
+                    current_price
+                    -
+                    current_year["Close"].iloc[0]
+                )
+                /
+                current_year["Close"].iloc[0]
+                * 100,
                 2
             )
 
@@ -148,20 +190,26 @@ for symbol in symbols:
             2
         )
 
-        distance_from_high = round(
+        from_high = round(
             (
-                (current_price - high_52w)
-                / high_52w
-            ) * 100,
+                current_price
+                - high_52w
+            )
+            /
+            high_52w
+            * 100,
             2
         )
 
         monthly_return = round(
             (
-                (hist["Close"].iloc[-1]
-                 - hist["Close"].iloc[-22])
-                / hist["Close"].iloc[-22]
-            ) * 100,
+                hist["Close"].iloc[-1]
+                -
+                hist["Close"].iloc[-22]
+            )
+            /
+            hist["Close"].iloc[-22]
+            * 100,
             2
         )
 
@@ -178,7 +226,6 @@ for symbol in symbols:
         trend = (
             hist["Close"]
             .tail(60)
-            .round(2)
             .tolist()
         )
 
@@ -220,7 +267,7 @@ for symbol in symbols:
             "Trend": trend,
             "1Y %": one_year_return,
             "52W High": high_52w,
-            "From High %": distance_from_high,
+            "From High %": from_high,
             "RS Rank": rs_rank,
             "20 SMA": sma20,
             "50 SMA": sma50,
@@ -228,31 +275,8 @@ for symbol in symbols:
 
         })
 
-    except Exception as e:
-
-        rows.append({
-
-            "Ticker": symbol,
-            "Company": f"ERROR: {e}",
-            "Price": "",
-            "Change %": "",
-            "Market Cap": "",
-            "P/E": "",
-            "YTD %": "",
-            "Trend": [],
-            "1Y %": "",
-            "52W High": "",
-            "From High %": "",
-            "RS Rank": "",
-            "20 SMA": "",
-            "50 SMA": "",
-            "200 SMA": ""
-
-        })
-
-# =========================
-# TABLE
-# =========================
+    except:
+        pass
 
 df = pd.DataFrame(rows)
 
@@ -264,14 +288,14 @@ def color_change(val):
 
         if val > 0:
             return (
-                "color: #22C55E;"
-                "font-weight: bold;"
+                "color:#22C55E;"
+                "font-weight:bold;"
             )
 
         if val < 0:
             return (
-                "color: #EF4444;"
-                "font-weight: bold;"
+                "color:#EF4444;"
+                "font-weight:bold;"
             )
 
     except:
@@ -292,7 +316,8 @@ styled_df = df.style.map(
 st.dataframe(
     styled_df,
     column_config={
-        "Trend": st.column_config.LineChartColumn(
+        "Trend":
+        st.column_config.LineChartColumn(
             "Trend",
             width="medium"
         )
