@@ -7,32 +7,53 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🚀 YFINANCE TEST")
+st.title("🚀 Miu Stock Dashboard")
 
 symbols = ["NVDA", "RKLB"]
 
 rows = []
 
 for symbol in symbols:
+
     try:
         stock = yf.Ticker(symbol)
-        info = stock.info
 
-        rows.append({
-            "Ticker": symbol,
-            "Company": info.get("longName", "N/A"),
-            "Price": info.get("currentPrice", info.get("regularMarketPrice", "N/A")),
-            "Market Cap": info.get("marketCap", "N/A"),
-            "P/E": info.get("trailingPE", "N/A"),
-        })
+        hist = stock.history(period="1y")
+
+        if len(hist) > 0:
+
+            current_price = round(hist["Close"].iloc[-1], 2)
+
+            sma20 = round(hist["Close"].rolling(20).mean().iloc[-1], 2)
+            sma50 = round(hist["Close"].rolling(50).mean().iloc[-1], 2)
+            sma200 = round(hist["Close"].rolling(200).mean().iloc[-1], 2)
+
+            one_year_return = round(
+                (
+                    (hist["Close"].iloc[-1] - hist["Close"].iloc[0])
+                    / hist["Close"].iloc[0]
+                ) * 100,
+                2,
+            )
+
+            rows.append({
+                "Ticker": symbol,
+                "Price": current_price,
+                "% 1Y": one_year_return,
+                "20SMA": sma20,
+                "50SMA": sma50,
+                "200SMA": sma200,
+            })
 
     except Exception as e:
+
         rows.append({
             "Ticker": symbol,
-            "Company": f"ERROR: {e}",
-            "Price": "N/A",
-            "Market Cap": "N/A",
-            "P/E": "N/A",
+            "Price": f"ERROR: {e}",
+            "% 1Y": "",
+            "20SMA": "",
+            "50SMA": "",
+            "200SMA": "",
         })
 
 df = pd.DataFrame(rows)
