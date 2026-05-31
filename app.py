@@ -11,6 +11,7 @@ st.title("📊 Miu Stock Dashboard")
 
 API_KEY = st.secrets["ALPHA_VANTAGE_KEY"]
 
+
 def get_overview(symbol):
     url = (
         f"https://www.alphavantage.co/query"
@@ -20,6 +21,18 @@ def get_overview(symbol):
     )
     return requests.get(url).json()
 
+
+def get_daily(symbol):
+    url = (
+        f"https://www.alphavantage.co/query"
+        f"?function=TIME_SERIES_DAILY_ADJUSTED"
+        f"&symbol={symbol}"
+        f"&outputsize=compact"
+        f"&apikey={API_KEY}"
+    )
+    return requests.get(url).json()
+
+
 symbols = ["NVDA", "RKLB"]
 
 rows = []
@@ -27,17 +40,11 @@ rows = []
 for symbol in symbols:
 
     data = get_overview(symbol)
-    def get_daily(symbol):
+    daily = get_daily(symbol)
 
-    url = (
-        f"https://www.alphavantage.co/query"
-        f"?function=TIME_SERIES_DAILY_ADJUSTED"
-        f"&symbol={symbol}"
-        f"&outputsize=full"
-        f"&apikey={API_KEY}"
-    )
+    st.write(symbol)
+    st.write(daily)
 
-    return requests.get(url).json()
     rows.append({
         "Ticker": symbol,
         "Company": data.get("Name", "N/A"),
