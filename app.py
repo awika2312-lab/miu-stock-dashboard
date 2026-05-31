@@ -27,7 +27,7 @@ rows = []
 for symbol in symbols:
 
     data = get_overview(symbol)
-
+    st.write(symbol, data)
     rows.append({
         "Ticker": symbol,
         "Company": data.get("Name", "N/A"),
