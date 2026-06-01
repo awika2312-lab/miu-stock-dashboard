@@ -13,127 +13,154 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
-/* ── Dark theme ── */
-.stApp { background-color: #0D0D0D; color: #E8E4DC; }
+/* ── TradingView-style: light bg, dark table ── */
+.stApp { background-color: #F0F3FA; color: #131722; }
 #MainMenu, footer, header { visibility: hidden; }
-.block-container { padding: 2rem 2.5rem; max-width: 1700px; }
+.block-container { padding: 0; max-width: 100%; }
 
-.dashboard-header {
-    display: flex; align-items: baseline; gap: 14px;
-    margin-bottom: 1.5rem; padding-bottom: 1rem;
-    border-bottom: 1px solid #2A2A2A;
+/* ── Top nav bar ── */
+.tv-navbar {
+    background: #FFFFFF;
+    border-bottom: 1px solid #E0E3EB;
+    padding: 0 24px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
 }
-.dashboard-title {
-    font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em;
-    color: #F0EDE6; margin: 0;
+.tv-logo {
+    font-size: 1rem; font-weight: 700; letter-spacing: -0.03em;
+    color: #131722;
 }
-.dashboard-subtitle { font-size: 0.78rem; color: #4A4A4A; font-weight: 400; letter-spacing: 0.04em; }
+.tv-logo span { color: #2962FF; }
+.tv-clock-bar {
+    display: flex; gap: 24px; align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+}
+.tv-clock-item { display: flex; flex-direction: column; align-items: flex-end; }
+.tv-clock-label { font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #868993; }
+.tv-clock-val { font-size: 0.82rem; font-weight: 500; color: #131722; }
+.tv-clock-date { font-size: 0.62rem; color: #B2B5BE; }
+.tv-market-open { font-size: 0.58rem; color: #089981; font-weight: 700; letter-spacing: 0.05em; }
+.tv-divider { width: 1px; height: 28px; background: #E0E3EB; }
 
+/* ── Main content padding ── */
+.tv-body { padding: 16px 20px; }
+
+/* ── Section label ── */
 .section-label {
     font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #444;
-    margin-bottom: 0.6rem; margin-top: 1.25rem;
+    text-transform: uppercase; color: #868993;
+    margin-bottom: 8px; margin-top: 16px;
 }
 
-/* ── Input ── */
+/* ── Add symbol input ── */
 .stTextInput > div > div > input {
-    background: #161616 !important; border: 1px solid #2A2A2A !important;
-    border-radius: 8px !important; font-family: 'DM Mono', monospace;
-    font-size: 0.85rem; color: #E8E4DC !important; padding: 0.5rem 0.75rem; box-shadow: none !important;
+    background: #FFFFFF !important; border: 1px solid #E0E3EB !important;
+    border-radius: 6px !important; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem; color: #131722 !important; padding: 0.45rem 0.75rem;
+    box-shadow: none !important;
 }
-.stTextInput > div > div > input::placeholder { color: #3A3A3A !important; }
-.stTextInput > div > div > input:focus { border-color: #555 !important; box-shadow: none !important; }
-.stTextInput label { color: #444 !important; }
+.stTextInput > div > div > input::placeholder { color: #B2B5BE !important; }
+.stTextInput > div > div > input:focus { border-color: #2962FF !important; box-shadow: 0 0 0 2px rgba(41,98,255,0.12) !important; }
+.stTextInput label { color: #868993 !important; font-size: 0.7rem !important; }
 
-/* ── Button ── */
+/* ── Add button ── */
 .stButton > button {
-    background: #1E1E1E; color: #C8C4BC; border: 1px solid #2A2A2A; border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
-    padding: 0.52rem 1.25rem; width: 100%; margin-top: 1.75rem; transition: all 0.15s;
+    background: #2962FF; color: #FFFFFF; border: none; border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600;
+    padding: 0.48rem 1rem; width: 100%; margin-top: 1.7rem; transition: background 0.15s;
 }
-.stButton > button:hover { background: #2A2A2A; color: #F0EDE6; border-color: #444; }
+.stButton > button:hover { background: #1E4FCC; }
 
-/* ── Dataframe ── */
-.stDataFrame { border-radius: 10px; overflow: hidden; border: 1px solid #1E1E1E !important; }
-[data-testid="stDataFrame"] > div { background: #111111 !important; border-radius: 10px; }
+/* ── Dataframe: dark table on light bg ── */
+.stDataFrame { border-radius: 8px; overflow: hidden; border: 1px solid #2A2E39 !important; }
+[data-testid="stDataFrame"] > div { background: #1E222D !important; border-radius: 8px; }
 .stDataFrame th {
-    background: #161616 !important; color: #444 !important; font-size: 0.67rem !important;
-    font-weight: 600 !important; letter-spacing: 0.07em !important; text-transform: uppercase !important;
-    border-bottom: 1px solid #1E1E1E !important; padding: 9px 12px !important;
+    background: #131722 !important; color: #4C525E !important;
+    font-size: 0.62rem !important; font-weight: 600 !important;
+    letter-spacing: 0.08em !important; text-transform: uppercase !important;
+    border-bottom: 1px solid #2A2E39 !important; padding: 8px 10px !important;
 }
 .stDataFrame td {
-    font-family: 'DM Mono', monospace; font-size: 0.8rem !important;
-    padding: 8px 12px !important; border-bottom: 1px solid #1A1A1A !important;
-    background: #111111 !important; color: #C8C4BC !important;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem !important;
+    padding: 7px 10px !important; border-bottom: 1px solid #2A2E39 !important;
+    background: #1E222D !important; color: #B2B5BE !important;
 }
-.stDataFrame tr:hover td { background: #161616 !important; }
-
-/* ── Clock bar ── */
-.clock-bar {
-    display: flex; gap: 24px; align-items: center;
-    background: #111111; border: 1px solid #1E1E1E; border-radius: 8px;
-    padding: 10px 18px; margin-bottom: 12px;
-    font-family: 'DM Mono', monospace;
-}
-.clock-item { display: flex; flex-direction: column; gap: 1px; }
-.clock-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #3A3A3A; }
-.clock-time  { font-size: 1.05rem; font-weight: 500; color: #E8E4DC; letter-spacing: 0.03em; }
-.clock-date  { font-size: 0.68rem; color: #3A3A3A; }
-.clock-open  { font-size: 0.6rem; color: #4A7A4A; font-weight: 600; letter-spacing: 0.05em; margin-top: 1px; }
-.clock-divider { width: 1px; height: 38px; background: #1E1E1E; }
+.stDataFrame tr:hover td { background: #262B3A !important; }
 
 /* ── News panel ── */
 .news-panel {
-    background: #111111; border: 1px solid #1E1E1E;
-    border-radius: 10px; overflow: hidden; margin-top: 6px;
+    background: #FFFFFF; border: 1px solid #E0E3EB;
+    border-radius: 8px; overflow: hidden; margin-top: 6px;
 }
-.news-item {
-    padding: 0; border-bottom: 1px solid #1A1A1A;
-    transition: background 0.1s;
-}
+.news-item { border-bottom: 1px solid #F0F3FA; transition: background 0.1s; }
 .news-item:last-child { border-bottom: none; }
-.news-item:hover { background: #161616; }
-.news-item-link {
-    display: block; text-decoration: none; padding: 12px 14px;
-}
+.news-item:hover { background: #F8F9FD; }
+.news-item-link { display: block; text-decoration: none; padding: 10px 12px; }
 .news-thumb {
-    width: 100%; aspect-ratio: 16/9; object-fit: cover;
-    border-radius: 6px; margin-bottom: 8px;
-    background: #1A1A1A;
-    display: block;
+    width: 100%; height: 90px; object-fit: cover;
+    border-radius: 4px; margin-bottom: 7px;
+    background: #F0F3FA; display: block;
 }
-.news-source {
-    font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em;
-    text-transform: uppercase; color: #3A3A3A; margin-bottom: 4px;
+.news-meta {
+    font-size: 0.58rem; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: #B2B5BE; margin-bottom: 4px;
 }
 .news-title {
-    font-size: 0.8rem; font-weight: 500; color: #C8C4BC;
-    line-height: 1.4; margin-bottom: 4px; display: block;
+    font-size: 0.77rem; font-weight: 500; color: #131722;
+    line-height: 1.4; display: block;
 }
-.news-item:hover .news-title { color: #F0EDE6; }
-.news-time { font-size: 0.65rem; color: #2E2E2E; font-family: 'DM Mono', monospace; }
-.no-news { padding: 28px 14px; color: #333; font-size: 0.82rem; text-align: center; }
-
+.news-item:hover .news-title { color: #2962FF; }
+.no-news { padding: 28px 14px; color: #B2B5BE; font-size: 0.8rem; text-align: center; }
 .news-ticker-badge {
-    display: inline-block; font-family: 'DM Mono', monospace;
-    font-size: 0.7rem; font-weight: 600;
-    background: #1E1E1E; color: #888; border: 1px solid #2A2A2A;
-    padding: 2px 10px; border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.05em;
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; font-weight: 600;
+    background: #EEF2FF; color: #2962FF; border: 1px solid #C7D7FF;
+    padding: 2px 10px; border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.04em;
+}
+.news-search-wrap input {
+    border-radius: 20px !important;
+    background: #F0F3FA !important;
+    border: 1px solid #E0E3EB !important;
 }
 </style>
+""", unsafe_allow_html=True)
 
-<div class="dashboard-header">
-    <span class="dashboard-title">Miu Stock Dashboard</span>
-    <span class="dashboard-subtitle">Real-Time Market Data &nbsp;·&nbsp; Technical Analysis &nbsp;·&nbsp; Portfolio Tracking</span>
+# ── Nav bar ──
+tz_th = ZoneInfo("Asia/Bangkok")
+tz_ny = ZoneInfo("America/New_York")
+now_th = datetime.now(tz_th)
+now_ny = datetime.now(tz_ny)
+is_open = now_ny.weekday() < 5 and 9*60+30 <= now_ny.hour*60+now_ny.minute <= 16*60
+market_tag = '<span class="tv-market-open">● OPEN</span>' if is_open else '<span style="font-size:0.58rem;color:#868993;">CLOSED</span>'
+
+st.markdown(f"""
+<div class="tv-navbar">
+  <div class="tv-logo">Miu <span>Stock</span></div>
+  <div class="tv-clock-bar">
+    <div class="tv-clock-item">
+      <span class="tv-clock-label">🇹🇭 Thailand</span>
+      <span class="tv-clock-val">{now_th.strftime("%H:%M:%S")}</span>
+      <span class="tv-clock-date">{now_th.strftime("%a %d %b %Y")}</span>
+    </div>
+    <div class="tv-divider"></div>
+    <div class="tv-clock-item">
+      <span class="tv-clock-label">🇺🇸 New York &nbsp; {market_tag}</span>
+      <span class="tv-clock-val">{now_ny.strftime("%H:%M:%S")}</span>
+      <span class="tv-clock-date">{now_ny.strftime("%a %d %b %Y")}</span>
+    </div>
+  </div>
 </div>
+<div class="tv-body">
 """, unsafe_allow_html=True)
 
 WATCHLIST_FILE = "watchlist.csv"
-
 if not Path(WATCHLIST_FILE).exists():
     pd.DataFrame({"Ticker": ["NVDA", "RKLB"]}).to_csv(WATCHLIST_FILE, index=False)
 
@@ -192,7 +219,7 @@ def fetch_stock_data(symbol):
     except:
         return None
 
-# ── Fetch news via yfinance (with thumbnail) ──
+# ── Fetch news ──
 @st.cache_data(ttl=600)
 def fetch_news(ticker):
     try:
@@ -216,15 +243,12 @@ def fetch_news(ticker):
                     diff = datetime.utcnow() - dt
                     time_str = f"{diff.days}d ago" if diff.days > 0 else (f"{diff.seconds//3600}h ago" if diff.seconds >= 3600 else f"{diff.seconds//60}m ago")
                 except: pass
-
-            # thumbnail
             thumb = ""
             try:
                 tm = content.get("thumbnail", n.get("thumbnail", {}))
                 if isinstance(tm, dict):
                     resolutions = tm.get("resolutions", [])
                     if resolutions:
-                        # เลือก resolution กลางๆ ไม่เล็กเกิน
                         best = sorted(resolutions, key=lambda x: x.get("width", 0))
                         for r in best:
                             if r.get("width", 0) >= 200:
@@ -233,13 +257,8 @@ def fetch_news(ticker):
                         if not thumb:
                             thumb = best[-1].get("url", "")
             except: pass
-
             if title:
-                items.append({
-                    "title": title, "link": link or "#",
-                    "source": provider, "time": time_str,
-                    "thumb": thumb,
-                })
+                items.append({"title": title, "link": link or "#", "source": provider, "time": time_str, "thumb": thumb})
         return items
     except:
         return []
@@ -250,43 +269,18 @@ rows = [r for r in rows if r]
 df = pd.DataFrame(rows)
 
 # ── Layout ──
-main_col, news_col = st.columns([3, 1], gap="large")
+main_col, news_col = st.columns([3, 1], gap="medium")
 
 with main_col:
     st.markdown('<p class="section-label">Watchlist</p>', unsafe_allow_html=True)
 
-    # Clock bar
-    tz_th = ZoneInfo("Asia/Bangkok")
-    tz_ny = ZoneInfo("America/New_York")
-    now_th = datetime.now(tz_th)
-    now_ny = datetime.now(tz_ny)
-    is_market_open = (now_ny.weekday() < 5 and 9*60+30 <= now_ny.hour*60+now_ny.minute <= 16*60)
-    market_tag = '<span class="clock-open">● MARKET OPEN</span>' if is_market_open else ""
-
-    st.markdown(f"""
-    <div class="clock-bar">
-        <div class="clock-item">
-            <span class="clock-label">🇹🇭 Thailand</span>
-            <span class="clock-time">{now_th.strftime("%H:%M:%S")}</span>
-            <span class="clock-date">{now_th.strftime("%a %d %b %Y")}</span>
-        </div>
-        <div class="clock-divider"></div>
-        <div class="clock-item">
-            <span class="clock-label">🇺🇸 New York</span>
-            <span class="clock-time">{now_ny.strftime("%H:%M:%S")}</span>
-            <span class="clock-date">{now_ny.strftime("%a %d %b %Y")}</span>
-            {market_tag}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     def color_pct(val):
         try:
             v = float(val)
-            if v > 0: return "color:#4A8C5C; font-weight:500;"
-            if v < 0: return "color:#8C4A4A; font-weight:500;"
+            if v > 0: return "color:#089981; font-weight:500;"
+            if v < 0: return "color:#F23645; font-weight:500;"
         except: pass
-        return "color:#444;"
+        return "color:#4C525E;"
 
     def fmt_mcap(val):
         try:
@@ -316,18 +310,15 @@ with main_col:
             height=min(60 + len(df) * 38, 600)
         )
     else:
-        st.markdown('<p style="color:#333;font-size:0.875rem;margin-top:1rem;">No data — add a symbol above.</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#868993;font-size:0.875rem;margin-top:1rem;">No data — add a symbol above.</p>', unsafe_allow_html=True)
 
 with news_col:
     st.markdown('<p class="section-label">Market News</p>', unsafe_allow_html=True)
 
     news_query = st.text_input(
-        "news_search",
-        placeholder="Search ticker  e.g. TSLA",
-        label_visibility="collapsed",
-        key="news_search_input"
+        "news_search", placeholder="Search ticker  e.g. TSLA",
+        label_visibility="collapsed", key="news_search_input"
     )
-
     search_ticker = news_query.strip().upper() if news_query.strip() else (symbols[0] if symbols else None)
 
     if search_ticker:
@@ -344,7 +335,7 @@ with news_col:
                 html += f"""<div class="news-item">
   <a class="news-item-link" href="{item['link']}" target="_blank">
     {thumb_html}
-    <div class="news-source">{source} &nbsp;·&nbsp; {item['time']}</div>
+    <div class="news-meta">{source} &nbsp;·&nbsp; {item['time']}</div>
     <span class="news-title">{title}</span>
   </a>
 </div>"""
@@ -354,3 +345,5 @@ with news_col:
             st.markdown('<div class="news-panel"><div class="no-news">ไม่พบข่าวสำหรับ ticker นี้</div></div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="news-panel"><div class="no-news">พิมพ์ชื่อหุ้นด้านบนเพื่อค้นหาข่าว</div></div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
