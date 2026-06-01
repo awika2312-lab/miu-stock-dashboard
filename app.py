@@ -210,13 +210,31 @@ def fetch_stock_data(symbol):
             mcap    = info.get("marketCap", "N/A")
             pe      = info.get("trailingPE", "N/A")
         except: pass
-        return {
-            "Ticker": symbol, "Company": company, "Price": cp,
-            "Change %": daily, "Market Cap": mcap, "P/E": pe,
-            "YTD %": ytd, "Trend": trend, "1Y %": yr1,
-            "52W High": h52, "From High %": fh, "RS Rank": rs,
-            "SMA 20": sma20, "SMA 50": sma50, "SMA 200": sma200,
-        }
+        return logo = ""
+
+try:
+    logo = info.get("logo_url", "")
+except:
+    pass
+
+return {
+    "Logo": logo,
+    "Ticker": symbol,
+    "Company": company,
+    "Price": cp,
+    "Change %": daily,
+    "Market Cap": mcap,
+    "P/E": pe,
+    "YTD %": ytd,
+    "Trend": trend,
+    "1Y %": yr1,
+    "52W High": h52,
+    "From High %": fh,
+    "RS Rank": rs,
+    "SMA 20": sma20,
+    "SMA 50": sma50,
+    "SMA 200": sma200,
+}
     except:
         return None
 
