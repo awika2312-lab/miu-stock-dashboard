@@ -297,7 +297,25 @@ k4.metric(
 )
 # Portfolio Analytics
 if not df.empty:
+# Top Movers
+best_stock = df.loc[df["Change %"].idxmax()]
+worst_stock = df.loc[df["Change %"].idxmin()]
 
+st.subheader("Top Movers")
+
+m1, m2 = st.columns(2)
+
+with m1:
+    st.success(
+        f"🚀 Best Performer\n\n"
+        f"{best_stock['Ticker']}  ({best_stock['Change %']:+.2f}%)"
+    )
+
+with m2:
+    st.error(
+        f"📉 Worst Performer\n\n"
+        f"{worst_stock['Ticker']}  ({worst_stock['Change %']:+.2f}%)"
+    )
     chart_df = df[["Ticker", "Price"]].copy()
 
     fig = px.pie(
