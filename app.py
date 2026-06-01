@@ -268,7 +268,11 @@ def fetch_news(ticker):
 rows = [fetch_stock_data(s) for s in symbols]
 rows = [r for r in rows if r]
 df = pd.DataFrame(rows)
-
+# KPI DATA
+portfolio_value = df["Price"].sum() if not df.empty else 0
+today_gain = df["Change %"].mean() if not df.empty else 0
+ytd_return = df["YTD %"].mean() if not df.empty else 0
+holdings = len(df)
 # ── Layout ──
 main_col, news_col = st.columns([3, 1], gap="medium")
 
