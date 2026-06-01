@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import yfinance as yf
+import plotly.express as px
 from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
