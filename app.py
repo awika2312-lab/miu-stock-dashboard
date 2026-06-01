@@ -180,59 +180,90 @@ with c2:
             symbols.append(ns)
             pd.DataFrame({"Ticker": symbols}).to_csv(WATCHLIST_FILE, index=False)
             st.rerun()
-
 # ── Fetch stock data ──
 @st.cache_data(ttl=300)
 def fetch_stock_data(symbol):
     try:
         stock = yf.Ticker(symbol)
         hist = stock.history(period="1y")
+
         if len(hist) < 200:
             return None
-        cp  = round(hist["Close"].iloc[-1], 2)
-        pp  = round(hist["Close"].iloc[-2], 2)
-        daily  = round((cp - pp) / pp * 100, 2)
-        yr1    = round((hist["Close"].iloc[-1] - hist["Close"].iloc[0]) / hist["Close"].iloc[0] * 100, 2)
-        cy     = hist[hist.index.year == pd.Timestamp.now().year]
-        ytd    = round((cp - cy["Close"].iloc[0]) / cy["Close"].iloc[0] * 100, 2) if len(cy) else 0
-        sma20  = round(hist["Close"].rolling(20).mean().iloc[-1], 2)
-        sma50  = round(hist["Close"].rolling(50).mean().iloc[-1], 2)
-        sma200 = round(hist["Close"].rolling(200).mean().iloc[-1], 2)
-        h52    = round(hist["High"].max(), 2)
-        fh     = round((cp - h52) / h52 * 100, 2)
-        mr     = round((hist["Close"].iloc[-1] - hist["Close"].iloc[-22]) / hist["Close"].iloc[-22] * 100, 2)
-        rs     = int(min(99, max(1, 50 + mr * 2)))
-        trend  = hist["Close"].tail(60).tolist()
-        company = symbol; mcap = "N/A"; pe = "N/A"
-        try:
-            info    = stock.info
-            company = info.get("longName", symbol)
-            mcap    = info.get("marketCap", "N/A")
-            pe      = info.get("trailingPE", "N/A")
-        except: pass
-      logo = ""
 
-try:
-    logo = info.get("logo_url", "")
-except:
-    pass
-    "Logo": logo,
-    "Ticker": symbol,
-    "Company": company,
-    "Price": cp,
-    "Change %": daily,
-    "Market Cap": mcap,
-    "P/E": pe,
-    "YTD %": ytd,
-    "Trend": trend,
-    "1Y %": yr1,
-    "52W High": h52,
-    "From High %": fh,
-    "RS Rank": rs,
-    "SMA 20": sma20,
-    "SMA 50": sma50,
-    "SMA 200": sma200,
-}
+        cp = round(hist["Close"].iloc[-1], 2)
+        pp = round(hist["Close"].iloc[-2], 2)
+
+        daily = round((cp - pp) / pp * 100, 2)
+        yr1 = round(
+            (hist["Close"].iloc[-1] - hist["Close"].iloc[0])
+            / hist["Close"].iloc[0] * 100,
+            2
+        )
+
+        cy = hist[hist.index.year == pd.Timestamp.now().year]
+
+        ytd = round(
+            (cp - cy["Close"].iloc[0])
+            / cy["Close"].iloc[0] * 100,
+            2
+        ) if len(cy) else 0
+
+        sma20 = round(hist["Close"].rolling(20).mean().iloc[-1], 2)
+        sma50 = round(hist["Close"].rolling(50).mean().iloc[-1], 2)
+        sma200 = round(hist["Close"].rolling(200).mean().iloc[-1], 2)
+
+        h52 = round(hist["High"].max(), 2)
+        fh = round((cp - h52) / h52 * 100, 2)
+
+        mr = round(
+            (hist["Close"].iloc[-1] - hist["Close"].iloc[-22])
+            / hist["Close"].iloc[-22] * 100,
+            2
+        )
+
+        rs = int(min(99, max(1, 50 + mr * 2)))
+        trend = hist["Close"].tail(60).tolist()
+
+        company = symbol
+        mcap = "N/A"
+        pe = "N/A"
+        logo = ""
+
+        try:
+            info = stock.info
+
+            company = info.get("longName", symbol)
+            mcap = info.get("marketCap", "N/A")
+            pe = info.get("trailingPE", "N/A")
+
+            logo = (
+                info.get("logo_url")
+                or info.get("logo")
+                or ""
+            )
+
+        except:
+            pass
+
+        return {
+            "Logo": logo,
+            "Ticker": symbol,
+            "Company": company,
+            "Price": cp,
+            "Change %": daily,
+            "Market Cap": mcap,
+            "P/E": pe,
+            "YTD %": ytd,
+            "Trend": trend,
+            "1Y %": yr1,
+            "52W High": h52,
+            "From High %": fh,
+            "RS Rank": rs,
+            "SMA 20": sma20,
+            "SMA 50": sma50,
+            "SMA 200": sma200,
+        }
+
     except:
         return None
 
