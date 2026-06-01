@@ -245,24 +245,26 @@ def fetch_stock_data(symbol):
         except:
             pass
 
-        return {
-            "Logo": logo,
-            "Ticker": symbol,
-            "Company": company,
-            "Price": cp,
-            "Change %": daily,
-            "Market Cap": mcap,
-            "P/E": pe,
-            "YTD %": ytd,
-            "Trend": trend,
-            "1Y %": yr1,
-            "52W High": h52,
-            "From High %": fh,
-            "RS Rank": rs,
-            "SMA 20": sma20,
-            "SMA 50": sma50,
-            "SMA 200": sma200,
-        }
+logo = f"https://logo.clearbit.com/{symbol.lower()}.com"
+
+return {
+    "Logo": logo,
+    "Ticker": symbol,
+    "Company": company,
+    "Price": cp,
+    "Change %": daily,
+    "Market Cap": mcap,
+    "P/E": pe,
+    "YTD %": ytd,
+    "Trend": trend,
+    "1Y %": yr1,
+    "52W High": h52,
+    "From High %": fh,
+    "RS Rank": rs,
+    "SMA 20": sma20,
+    "SMA 50": sma50,
+    "SMA 200": sma200,
+}        
 
     except:
         return None
