@@ -3,6 +3,7 @@ import pandas as pd
 import yfinance as yf
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 st.set_page_config(
     page_title="Miu Stock Dashboard",
@@ -15,77 +16,119 @@ st.markdown("""
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
-.stApp { background-color: #F7F7F5; color: #1A1A1A; }
+
+/* ── Dark theme ── */
+.stApp { background-color: #0D0D0D; color: #E8E4DC; }
 #MainMenu, footer, header { visibility: hidden; }
 .block-container { padding: 2rem 2.5rem; max-width: 1700px; }
 
 .dashboard-header {
-    display: flex; align-items: baseline; gap: 12px;
+    display: flex; align-items: baseline; gap: 14px;
     margin-bottom: 1.5rem; padding-bottom: 1rem;
-    border-bottom: 1px solid #E0DDD8;
+    border-bottom: 1px solid #2A2A2A;
 }
-.dashboard-title { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; color: #1A1A1A; margin: 0; }
-.dashboard-subtitle { font-size: 0.78rem; color: #9E9B95; font-weight: 400; letter-spacing: 0.03em; }
+.dashboard-title {
+    font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em;
+    color: #F0EDE6; margin: 0;
+}
+.dashboard-subtitle { font-size: 0.78rem; color: #4A4A4A; font-weight: 400; letter-spacing: 0.04em; }
 
 .section-label {
-    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.09em;
-    text-transform: uppercase; color: #9E9B95;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #444;
     margin-bottom: 0.6rem; margin-top: 1.25rem;
 }
 
+/* ── Input ── */
 .stTextInput > div > div > input {
-    background: #FFFFFF; border: 1px solid #E0DDD8 !important;
+    background: #161616 !important; border: 1px solid #2A2A2A !important;
     border-radius: 8px !important; font-family: 'DM Mono', monospace;
-    font-size: 0.85rem; color: #1A1A1A; padding: 0.5rem 0.75rem; box-shadow: none !important;
+    font-size: 0.85rem; color: #E8E4DC !important; padding: 0.5rem 0.75rem; box-shadow: none !important;
 }
-.stTextInput > div > div > input:focus { border-color: #1A1A1A !important; box-shadow: none !important; }
+.stTextInput > div > div > input::placeholder { color: #3A3A3A !important; }
+.stTextInput > div > div > input:focus { border-color: #555 !important; box-shadow: none !important; }
+.stTextInput label { color: #444 !important; }
 
+/* ── Button ── */
 .stButton > button {
-    background: #1A1A1A; color: #F7F7F5; border: none; border-radius: 8px;
+    background: #1E1E1E; color: #C8C4BC; border: 1px solid #2A2A2A; border-radius: 8px;
     font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
-    padding: 0.52rem 1.25rem; width: 100%; margin-top: 1.75rem;
+    padding: 0.52rem 1.25rem; width: 100%; margin-top: 1.75rem; transition: all 0.15s;
 }
-.stButton > button:hover { background: #333333; }
+.stButton > button:hover { background: #2A2A2A; color: #F0EDE6; border-color: #444; }
 
-.stDataFrame { border-radius: 10px; overflow: hidden; border: 1px solid #E0DDD8; background: #FFFFFF; }
+/* ── Dataframe ── */
+.stDataFrame { border-radius: 10px; overflow: hidden; border: 1px solid #1E1E1E !important; }
+[data-testid="stDataFrame"] > div { background: #111111 !important; border-radius: 10px; }
 .stDataFrame th {
-    background: #F0EDE8 !important; color: #6B6860 !important; font-size: 0.68rem !important;
-    font-weight: 600 !important; letter-spacing: 0.06em !important; text-transform: uppercase !important;
-    border-bottom: 1px solid #E0DDD8 !important; padding: 9px 12px !important;
+    background: #161616 !important; color: #444 !important; font-size: 0.67rem !important;
+    font-weight: 600 !important; letter-spacing: 0.07em !important; text-transform: uppercase !important;
+    border-bottom: 1px solid #1E1E1E !important; padding: 9px 12px !important;
 }
 .stDataFrame td {
     font-family: 'DM Mono', monospace; font-size: 0.8rem !important;
-    padding: 8px 12px !important; border-bottom: 1px solid #F0EDE8 !important; background: #FFFFFF !important;
+    padding: 8px 12px !important; border-bottom: 1px solid #1A1A1A !important;
+    background: #111111 !important; color: #C8C4BC !important;
 }
-.stDataFrame tr:hover td { background: #FAFAF8 !important; }
+.stDataFrame tr:hover td { background: #161616 !important; }
 
-/* News search input override — ทำให้ดูต่างจาก add symbol */
-.news-search input {
-    border-radius: 20px !important;
-}
-
-.news-panel { background: #FFFFFF; border: 1px solid #E0DDD8; border-radius: 10px; overflow: hidden; margin-top: 0.5rem; }
-.news-item { padding: 11px 14px; border-bottom: 1px solid #F0EDE8; }
-.news-item:last-child { border-bottom: none; }
-.news-item:hover { background: #FAFAF8; }
-.news-source { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #9E9B95; margin-bottom: 3px; }
-.news-title { font-size: 0.81rem; font-weight: 500; color: #1A1A1A; line-height: 1.35; margin-bottom: 3px; text-decoration: none; display: block; }
-.news-title:hover { color: #555; text-decoration: underline; }
-.news-time { font-size: 0.67rem; color: #B0ADA8; font-family: 'DM Mono', monospace; }
-.no-news { padding: 24px 14px; color: #9E9B95; font-size: 0.82rem; text-align: center; }
-.news-ticker-badge {
-    display: inline-block;
+/* ── Clock bar ── */
+.clock-bar {
+    display: flex; gap: 24px; align-items: center;
+    background: #111111; border: 1px solid #1E1E1E; border-radius: 8px;
+    padding: 10px 18px; margin-bottom: 12px;
     font-family: 'DM Mono', monospace;
-    font-size: 0.72rem; font-weight: 600;
-    background: #1A1A1A; color: #F7F7F5;
-    padding: 2px 8px; border-radius: 4px;
-    margin-bottom: 8px;
+}
+.clock-item { display: flex; flex-direction: column; gap: 1px; }
+.clock-label { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #3A3A3A; }
+.clock-time  { font-size: 1.05rem; font-weight: 500; color: #E8E4DC; letter-spacing: 0.03em; }
+.clock-date  { font-size: 0.68rem; color: #3A3A3A; }
+.clock-open  { font-size: 0.6rem; color: #4A7A4A; font-weight: 600; letter-spacing: 0.05em; margin-top: 1px; }
+.clock-divider { width: 1px; height: 38px; background: #1E1E1E; }
+
+/* ── News panel ── */
+.news-panel {
+    background: #111111; border: 1px solid #1E1E1E;
+    border-radius: 10px; overflow: hidden; margin-top: 6px;
+}
+.news-item {
+    padding: 0; border-bottom: 1px solid #1A1A1A;
+    transition: background 0.1s;
+}
+.news-item:last-child { border-bottom: none; }
+.news-item:hover { background: #161616; }
+.news-item-link {
+    display: block; text-decoration: none; padding: 12px 14px;
+}
+.news-thumb {
+    width: 100%; aspect-ratio: 16/9; object-fit: cover;
+    border-radius: 6px; margin-bottom: 8px;
+    background: #1A1A1A;
+    display: block;
+}
+.news-source {
+    font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #3A3A3A; margin-bottom: 4px;
+}
+.news-title {
+    font-size: 0.8rem; font-weight: 500; color: #C8C4BC;
+    line-height: 1.4; margin-bottom: 4px; display: block;
+}
+.news-item:hover .news-title { color: #F0EDE6; }
+.news-time { font-size: 0.65rem; color: #2E2E2E; font-family: 'DM Mono', monospace; }
+.no-news { padding: 28px 14px; color: #333; font-size: 0.82rem; text-align: center; }
+
+.news-ticker-badge {
+    display: inline-block; font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; font-weight: 600;
+    background: #1E1E1E; color: #888; border: 1px solid #2A2A2A;
+    padding: 2px 10px; border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.05em;
 }
 </style>
 
 <div class="dashboard-header">
     <span class="dashboard-title">Miu Stock Dashboard</span>
-    <span class="dashboard-subtitle">Real-Time Market Data · Technical Analysis · Portfolio Tracking</span>
+    <span class="dashboard-subtitle">Real-Time Market Data &nbsp;·&nbsp; Technical Analysis &nbsp;·&nbsp; Portfolio Tracking</span>
 </div>
 """, unsafe_allow_html=True)
 
@@ -149,14 +192,14 @@ def fetch_stock_data(symbol):
     except:
         return None
 
-# ── Fetch news via yfinance ──
+# ── Fetch news via yfinance (with thumbnail) ──
 @st.cache_data(ttl=600)
 def fetch_news(ticker):
     try:
         stock = yf.Ticker(ticker.upper())
         raw = stock.news
         items = []
-        for n in raw[:15]:
+        for n in raw[:12]:
             content  = n.get("content", n)
             title    = content.get("title", n.get("title", ""))
             cl       = content.get("canonicalUrl", {})
@@ -173,8 +216,30 @@ def fetch_news(ticker):
                     diff = datetime.utcnow() - dt
                     time_str = f"{diff.days}d ago" if diff.days > 0 else (f"{diff.seconds//3600}h ago" if diff.seconds >= 3600 else f"{diff.seconds//60}m ago")
                 except: pass
+
+            # thumbnail
+            thumb = ""
+            try:
+                tm = content.get("thumbnail", n.get("thumbnail", {}))
+                if isinstance(tm, dict):
+                    resolutions = tm.get("resolutions", [])
+                    if resolutions:
+                        # เลือก resolution กลางๆ ไม่เล็กเกิน
+                        best = sorted(resolutions, key=lambda x: x.get("width", 0))
+                        for r in best:
+                            if r.get("width", 0) >= 200:
+                                thumb = r.get("url", "")
+                                break
+                        if not thumb:
+                            thumb = best[-1].get("url", "")
+            except: pass
+
             if title:
-                items.append({"title": title, "link": link or "#", "source": provider, "time": time_str})
+                items.append({
+                    "title": title, "link": link or "#",
+                    "source": provider, "time": time_str,
+                    "thumb": thumb,
+                })
         return items
     except:
         return []
@@ -184,19 +249,44 @@ rows = [fetch_stock_data(s) for s in symbols]
 rows = [r for r in rows if r]
 df = pd.DataFrame(rows)
 
-# ── Layout: table left | news right ──
+# ── Layout ──
 main_col, news_col = st.columns([3, 1], gap="large")
 
 with main_col:
     st.markdown('<p class="section-label">Watchlist</p>', unsafe_allow_html=True)
 
+    # Clock bar
+    tz_th = ZoneInfo("Asia/Bangkok")
+    tz_ny = ZoneInfo("America/New_York")
+    now_th = datetime.now(tz_th)
+    now_ny = datetime.now(tz_ny)
+    is_market_open = (now_ny.weekday() < 5 and 9*60+30 <= now_ny.hour*60+now_ny.minute <= 16*60)
+    market_tag = '<span class="clock-open">● MARKET OPEN</span>' if is_market_open else ""
+
+    st.markdown(f"""
+    <div class="clock-bar">
+        <div class="clock-item">
+            <span class="clock-label">🇹🇭 Thailand</span>
+            <span class="clock-time">{now_th.strftime("%H:%M:%S")}</span>
+            <span class="clock-date">{now_th.strftime("%a %d %b %Y")}</span>
+        </div>
+        <div class="clock-divider"></div>
+        <div class="clock-item">
+            <span class="clock-label">🇺🇸 New York</span>
+            <span class="clock-time">{now_ny.strftime("%H:%M:%S")}</span>
+            <span class="clock-date">{now_ny.strftime("%a %d %b %Y")}</span>
+            {market_tag}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     def color_pct(val):
         try:
             v = float(val)
-            if v > 0: return "color:#16A34A; font-weight:500;"
-            if v < 0: return "color:#DC2626; font-weight:500;"
+            if v > 0: return "color:#4A8C5C; font-weight:500;"
+            if v < 0: return "color:#8C4A4A; font-weight:500;"
         except: pass
-        return "color:#6B6860;"
+        return "color:#444;"
 
     def fmt_mcap(val):
         try:
@@ -226,20 +316,18 @@ with main_col:
             height=min(60 + len(df) * 38, 600)
         )
     else:
-        st.markdown('<p style="color:#9E9B95;font-size:0.875rem;margin-top:1rem;">No data — add a symbol above.</p>', unsafe_allow_html=True)
+        st.markdown('<p style="color:#333;font-size:0.875rem;margin-top:1rem;">No data — add a symbol above.</p>', unsafe_allow_html=True)
 
 with news_col:
     st.markdown('<p class="section-label">Market News</p>', unsafe_allow_html=True)
 
-    # ── Search box ──
     news_query = st.text_input(
         "news_search",
-        placeholder="Search ticker e.g. TSLA",
+        placeholder="Search ticker  e.g. TSLA",
         label_visibility="collapsed",
         key="news_search_input"
     )
 
-    # ใช้ ticker ที่พิมพ์ ถ้ายังไม่ได้พิมพ์ให้ใช้ตัวแรกใน watchlist
     search_ticker = news_query.strip().upper() if news_query.strip() else (symbols[0] if symbols else None)
 
     if search_ticker:
@@ -250,10 +338,15 @@ with news_col:
             for item in news_items:
                 title  = item["title"].replace("<","&lt;").replace(">","&gt;")
                 source = item["source"].replace("<","&lt;").replace(">","&gt;")
+                thumb_html = ""
+                if item.get("thumb"):
+                    thumb_html = f'<img class="news-thumb" src="{item["thumb"]}" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
                 html += f"""<div class="news-item">
-  <div class="news-source">{source}</div>
-  <a class="news-title" href="{item['link']}" target="_blank">{title}</a>
-  <div class="news-time">{item['time']}</div>
+  <a class="news-item-link" href="{item['link']}" target="_blank">
+    {thumb_html}
+    <div class="news-source">{source} &nbsp;·&nbsp; {item['time']}</div>
+    <span class="news-title">{title}</span>
+  </a>
 </div>"""
             html += "</div>"
             st.markdown(html, unsafe_allow_html=True)
