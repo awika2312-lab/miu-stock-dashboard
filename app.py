@@ -274,6 +274,27 @@ today_gain = df["Change %"].mean() if not df.empty else 0
 ytd_return = df["YTD %"].mean() if not df.empty else 0
 holdings = len(df)
 # ── Layout ──
+k1, k2, k3, k4 = st.columns(4)
+
+k1.metric(
+    "Portfolio Value",
+    f"${portfolio_value:,.2f}"
+)
+
+k2.metric(
+    "Today's Gain",
+    f"{today_gain:+.2f}%"
+)
+
+k3.metric(
+    "YTD Return",
+    f"{ytd_return:+.2f}%"
+)
+
+k4.metric(
+    "Holdings",
+    holdings
+)
 main_col, news_col = st.columns([3, 1], gap="medium")
 
 with main_col:
