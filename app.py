@@ -295,6 +295,28 @@ k4.metric(
     "Holdings",
     holdings
 )
+# Portfolio Analytics
+if not df.empty:
+
+    chart_df = df[["Ticker", "Price"]].copy()
+
+    fig = px.pie(
+        chart_df,
+        names="Ticker",
+        values="Price",
+        hole=0.65
+    )
+
+    fig.update_layout(
+        height=350,
+        margin=dict(l=10, r=10, t=20, b=10)
+    )
+
+    st.subheader("Portfolio Allocation")
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 main_col, news_col = st.columns([3, 1], gap="medium")
 
 with main_col:
