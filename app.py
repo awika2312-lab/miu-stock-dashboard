@@ -296,26 +296,30 @@ k4.metric(
     holdings
 )
 # Portfolio Analytics
+# Portfolio Analytics
 if not df.empty:
-# Top Movers
-best_stock = df.loc[df["Change %"].idxmax()]
-worst_stock = df.loc[df["Change %"].idxmin()]
 
-st.subheader("Top Movers")
+    # Top Movers
+    best_stock = df.loc[df["Change %"].idxmax()]
+    worst_stock = df.loc[df["Change %"].idxmin()]
 
-m1, m2 = st.columns(2)
+    st.subheader("Top Movers")
 
-with m1:
-    st.success(
-        f"🚀 Best Performer\n\n"
-        f"{best_stock['Ticker']}  ({best_stock['Change %']:+.2f}%)"
-    )
+    m1, m2 = st.columns(2)
 
-with m2:
-    st.error(
-        f"📉 Worst Performer\n\n"
-        f"{worst_stock['Ticker']}  ({worst_stock['Change %']:+.2f}%)"
-    )
+    with m1:
+        st.success(
+            f"🚀 Best Performer\n\n"
+            f"{best_stock['Ticker']} ({best_stock['Change %']:+.2f}%)"
+        )
+
+    with m2:
+        st.error(
+            f"📉 Worst Performer\n\n"
+            f"{worst_stock['Ticker']} ({worst_stock['Change %']:+.2f}%)"
+        )
+
+    # Portfolio Allocation
     chart_df = df[["Ticker", "Price"]].copy()
 
     fig = px.pie(
@@ -335,6 +339,7 @@ with m2:
         fig,
         use_container_width=True
     )
+    
 main_col, news_col = st.columns([3, 1], gap="medium")
 
 with main_col:
