@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 from pathlib import Path
+from datetime import datetime
 
 st.set_page_config(
     page_title="Miu Stock Dashboard",
@@ -13,138 +14,60 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
-}
-
-.stApp {
-    background-color: #F7F7F5;
-    color: #1A1A1A;
-}
-
-/* Hide default streamlit chrome */
+html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+.stApp { background-color: #F7F7F5; color: #1A1A1A; }
 #MainMenu, footer, header { visibility: hidden; }
-.block-container {
-    padding: 2.5rem 3rem 2rem 3rem;
-    max-width: 1400px;
-}
+.block-container { padding: 2rem 2.5rem; max-width: 1600px; }
 
-/* ── Header ── */
 .dashboard-header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 2rem;
-    padding-bottom: 1.25rem;
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 1.5rem; padding-bottom: 1rem;
     border-bottom: 1px solid #E0DDD8;
 }
-.dashboard-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: #1A1A1A;
-    margin: 0;
-}
-.dashboard-subtitle {
-    font-size: 0.8rem;
-    color: #9E9B95;
-    font-weight: 400;
-    letter-spacing: 0.03em;
-}
+.dashboard-title { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; color: #1A1A1A; margin: 0; }
+.dashboard-subtitle { font-size: 0.78rem; color: #9E9B95; font-weight: 400; letter-spacing: 0.03em; }
 
-/* ── Add Symbol bar ── */
-.stTextInput > div > div > input {
-    background: #FFFFFF;
-    border: 1px solid #E0DDD8 !important;
-    border-radius: 8px !important;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    color: #1A1A1A;
-    padding: 0.5rem 0.75rem;
-    box-shadow: none !important;
-}
-.stTextInput > div > div > input:focus {
-    border-color: #1A1A1A !important;
-    box-shadow: none !important;
-}
-.stTextInput label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #9E9B95;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-}
-
-/* ── Button ── */
-.stButton > button {
-    background: #1A1A1A;
-    color: #F7F7F5;
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.52rem 1.25rem;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    width: 100%;
-    margin-top: 1.75rem;
-}
-.stButton > button:hover {
-    background: #333333;
-}
-
-/* ── Dataframe ── */
-.stDataFrame {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #E0DDD8;
-    background: #FFFFFF;
-}
-[data-testid="stDataFrame"] > div {
-    border-radius: 12px;
-}
-
-/* Table header */
-.stDataFrame th {
-    background: #F0EDE8 !important;
-    color: #6B6860 !important;
-    font-size: 0.7rem !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
-    border-bottom: 1px solid #E0DDD8 !important;
-    padding: 10px 14px !important;
-}
-
-/* Table rows */
-.stDataFrame td {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem !important;
-    padding: 9px 14px !important;
-    border-bottom: 1px solid #F0EDE8 !important;
-    background: #FFFFFF !important;
-}
-.stDataFrame tr:hover td {
-    background: #FAFAF8 !important;
-}
-
-/* Section label */
 .section-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #9E9B95;
-    margin-bottom: 0.75rem;
-    margin-top: 1.75rem;
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.09em;
+    text-transform: uppercase; color: #9E9B95;
+    margin-bottom: 0.6rem; margin-top: 1.25rem;
 }
 
-/* Ticker badge */
-.ticker-mono {
-    font-family: 'DM Mono', monospace;
-    font-weight: 500;
+.stTextInput > div > div > input {
+    background: #FFFFFF; border: 1px solid #E0DDD8 !important;
+    border-radius: 8px !important; font-family: 'DM Mono', monospace;
+    font-size: 0.85rem; color: #1A1A1A; padding: 0.5rem 0.75rem; box-shadow: none !important;
 }
+.stTextInput > div > div > input:focus { border-color: #1A1A1A !important; box-shadow: none !important; }
+
+.stButton > button {
+    background: #1A1A1A; color: #F7F7F5; border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    padding: 0.52rem 1.25rem; width: 100%; margin-top: 1.75rem;
+}
+.stButton > button:hover { background: #333333; }
+
+.stDataFrame { border-radius: 10px; overflow: hidden; border: 1px solid #E0DDD8; background: #FFFFFF; }
+.stDataFrame th {
+    background: #F0EDE8 !important; color: #6B6860 !important; font-size: 0.68rem !important;
+    font-weight: 600 !important; letter-spacing: 0.06em !important; text-transform: uppercase !important;
+    border-bottom: 1px solid #E0DDD8 !important; padding: 9px 12px !important;
+}
+.stDataFrame td {
+    font-family: 'DM Mono', monospace; font-size: 0.8rem !important;
+    padding: 8px 12px !important; border-bottom: 1px solid #F0EDE8 !important; background: #FFFFFF !important;
+}
+.stDataFrame tr:hover td { background: #FAFAF8 !important; }
+
+.news-panel { background: #FFFFFF; border: 1px solid #E0DDD8; border-radius: 10px; overflow: hidden; }
+.news-item { padding: 11px 14px; border-bottom: 1px solid #F0EDE8; }
+.news-item:last-child { border-bottom: none; }
+.news-item:hover { background: #FAFAF8; }
+.news-source { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #9E9B95; margin-bottom: 3px; }
+.news-title { font-size: 0.81rem; font-weight: 500; color: #1A1A1A; line-height: 1.35; margin-bottom: 3px; text-decoration: none; display: block; }
+.news-title:hover { color: #555; text-decoration: underline; }
+.news-time { font-size: 0.67rem; color: #B0ADA8; font-family: 'DM Mono', monospace; }
+.no-news { padding: 20px 14px; color: #9E9B95; font-size: 0.82rem; text-align: center; }
 </style>
 
 <div class="dashboard-header">
@@ -155,192 +78,192 @@ html, body, [class*="css"] {
 
 WATCHLIST_FILE = "watchlist.csv"
 
-# =====================
-# LOAD WATCHLIST
-# =====================
-
 if not Path(WATCHLIST_FILE).exists():
-    pd.DataFrame({
-        "Ticker": ["NVDA", "RKLB"]
-    }).to_csv(WATCHLIST_FILE, index=False)
+    pd.DataFrame({"Ticker": ["NVDA", "RKLB"]}).to_csv(WATCHLIST_FILE, index=False)
 
 watchlist_df = pd.read_csv(WATCHLIST_FILE)
-symbols = (
-    watchlist_df["Ticker"]
-    .dropna()
-    .astype(str)
-    .str.upper()
-    .tolist()
-)
+symbols = watchlist_df["Ticker"].dropna().astype(str).str.upper().tolist()
 
-# =====================
-# ADD SYMBOL
-# =====================
-
+# ── Add symbol ──
 st.markdown('<p class="section-label">Add to Watchlist</p>', unsafe_allow_html=True)
+c1, c2 = st.columns([4, 1])
+with c1:
+    new_symbol = st.text_input("Ticker", placeholder="e.g. AAPL", label_visibility="collapsed")
+with c2:
+    if st.button("＋ Add") and new_symbol:
+        ns = new_symbol.upper()
+        if ns not in symbols:
+            symbols.append(ns)
+            pd.DataFrame({"Ticker": symbols}).to_csv(WATCHLIST_FILE, index=False)
+            st.rerun()
 
-col1, col2 = st.columns([4, 1])
-
-with col1:
-    new_symbol = st.text_input(
-        "Ticker Symbol",
-        placeholder="e.g. AAPL",
-        label_visibility="collapsed"
-    )
-
-with col2:
-    add_clicked = st.button("＋ Add")
-
-if add_clicked and new_symbol:
-    new_symbol = new_symbol.upper()
-    if new_symbol not in symbols:
-        symbols.append(new_symbol)
-        pd.DataFrame({"Ticker": symbols}).to_csv(WATCHLIST_FILE, index=False)
-        st.rerun()
-
-# =====================
-# STOCK TABLE
-# =====================
-
-st.markdown('<p class="section-label">Watchlist</p>', unsafe_allow_html=True)
-
-rows = []
-
-for symbol in symbols:
+# ── Fetch stock data ──
+@st.cache_data(ttl=300)
+def fetch_stock_data(symbol):
     try:
         stock = yf.Ticker(symbol)
         hist = stock.history(period="1y")
-
         if len(hist) < 200:
-            continue
-
-        current_price = round(hist["Close"].iloc[-1], 2)
-        previous_price = round(hist["Close"].iloc[-2], 2)
-
-        daily_return = round(
-            (current_price - previous_price) / previous_price * 100, 2
-        )
-
-        one_year_return = round(
-            (hist["Close"].iloc[-1] - hist["Close"].iloc[0]) / hist["Close"].iloc[0] * 100, 2
-        )
-
-        current_year = hist[hist.index.year == pd.Timestamp.now().year]
-        ytd_return = round(
-            (current_price - current_year["Close"].iloc[0]) / current_year["Close"].iloc[0] * 100, 2
-        ) if len(current_year) else 0
-
-        sma20  = round(hist["Close"].rolling(20).mean().iloc[-1], 2)
-        sma50  = round(hist["Close"].rolling(50).mean().iloc[-1], 2)
-        sma200 = round(hist["Close"].rolling(200).mean().iloc[-1], 2)
-
-        high_52w = round(hist["High"].max(), 2)
-        from_high = round((current_price - high_52w) / high_52w * 100, 2)
-
-        monthly_return = round(
-            (hist["Close"].iloc[-1] - hist["Close"].iloc[-22]) / hist["Close"].iloc[-22] * 100, 2
-        )
-        rs_rank = int(min(99, max(1, 50 + monthly_return * 2)))
-
-        trend = hist["Close"].tail(60).tolist()
-
-        company = symbol
-        market_cap = "N/A"
-        pe_ratio = "N/A"
-
+            return None
+        cp = round(hist["Close"].iloc[-1], 2)
+        pp = round(hist["Close"].iloc[-2], 2)
+        daily   = round((cp - pp) / pp * 100, 2)
+        yr1     = round((hist["Close"].iloc[-1] - hist["Close"].iloc[0]) / hist["Close"].iloc[0] * 100, 2)
+        cy      = hist[hist.index.year == pd.Timestamp.now().year]
+        ytd     = round((cp - cy["Close"].iloc[0]) / cy["Close"].iloc[0] * 100, 2) if len(cy) else 0
+        sma20   = round(hist["Close"].rolling(20).mean().iloc[-1], 2)
+        sma50   = round(hist["Close"].rolling(50).mean().iloc[-1], 2)
+        sma200  = round(hist["Close"].rolling(200).mean().iloc[-1], 2)
+        h52     = round(hist["High"].max(), 2)
+        fh      = round((cp - h52) / h52 * 100, 2)
+        mr      = round((hist["Close"].iloc[-1] - hist["Close"].iloc[-22]) / hist["Close"].iloc[-22] * 100, 2)
+        rs      = int(min(99, max(1, 50 + mr * 2)))
+        trend   = hist["Close"].tail(60).tolist()
+        company = symbol; mcap = "N/A"; pe = "N/A"
         try:
-            info = stock.info
-            company   = info.get("longName", symbol)
-            market_cap = info.get("marketCap", "N/A")
-            pe_ratio  = info.get("trailingPE", "N/A")
-        except:
-            pass
-
-        rows.append({
-            "Ticker":     symbol,
-            "Company":    company,
-            "Price":      current_price,
-            "Change %":   daily_return,
-            "Market Cap": market_cap,
-            "P/E":        pe_ratio,
-            "YTD %":      ytd_return,
-            "Trend":      trend,
-            "1Y %":       one_year_return,
-            "52W High":   high_52w,
-            "From High %": from_high,
-            "RS Rank":    rs_rank,
-            "SMA 20":     sma20,
-            "SMA 50":     sma50,
-            "SMA 200":    sma200,
-        })
-
+            info    = stock.info
+            company = info.get("longName", symbol)
+            mcap    = info.get("marketCap", "N/A")
+            pe      = info.get("trailingPE", "N/A")
+        except: pass
+        return {
+            "Ticker": symbol, "Company": company, "Price": cp,
+            "Change %": daily, "Market Cap": mcap, "P/E": pe,
+            "YTD %": ytd, "Trend": trend, "1Y %": yr1,
+            "52W High": h52, "From High %": fh, "RS Rank": rs,
+            "SMA 20": sma20, "SMA 50": sma50, "SMA 200": sma200,
+        }
     except:
-        pass
+        return None
 
+# ── Fetch news via yfinance ──
+@st.cache_data(ttl=600)
+def fetch_news(ticker):
+    try:
+        stock = yf.Ticker(ticker)
+        raw = stock.news
+        items = []
+        for n in raw[:15]:
+            # yfinance >= 0.2.x structure
+            content = n.get("content", n)
+            title   = content.get("title", n.get("title", ""))
+            link    = ""
+            # try canonical url
+            cl = content.get("canonicalUrl", {})
+            if isinstance(cl, dict):
+                link = cl.get("url", "")
+            if not link:
+                link = content.get("url", n.get("link", "#"))
+
+            provider = ""
+            prov = content.get("provider", {})
+            if isinstance(prov, dict):
+                provider = prov.get("displayName", "Yahoo Finance")
+            if not provider:
+                provider = n.get("publisher", "Yahoo Finance")
+
+            pub_ts = content.get("pubDate", n.get("providerPublishTime", None))
+            time_str = ""
+            if pub_ts:
+                try:
+                    if isinstance(pub_ts, str):
+                        dt = datetime.strptime(pub_ts[:19], "%Y-%m-%dT%H:%M:%S")
+                    else:
+                        dt = datetime.utcfromtimestamp(int(pub_ts))
+                    diff = datetime.utcnow() - dt
+                    if diff.days > 0:
+                        time_str = f"{diff.days}d ago"
+                    elif diff.seconds >= 3600:
+                        time_str = f"{diff.seconds // 3600}h ago"
+                    else:
+                        time_str = f"{diff.seconds // 60}m ago"
+                except: pass
+
+            if title:
+                items.append({"title": title, "link": link or "#", "source": provider, "time": time_str})
+        return items
+    except:
+        return []
+
+# ── Build rows ──
+rows = [fetch_stock_data(s) for s in symbols]
+rows = [r for r in rows if r]
 df = pd.DataFrame(rows)
 
-# ── Colour helpers ──
-def color_pct(val):
-    try:
-        v = float(val)
-        if v > 0:  return "color:#16A34A; font-weight:500;"
-        if v < 0:  return "color:#DC2626; font-weight:500;"
-    except:
-        pass
-    return "color:#6B6860;"
+# ── Session state for selected ticker news ──
+if "sel_ticker" not in st.session_state:
+    st.session_state.sel_ticker = symbols[0] if symbols else None
 
-def format_mcap(val):
-    try:
-        v = float(val)
-        if v >= 1e12: return f"${v/1e12:.2f}T"
-        if v >= 1e9:  return f"${v/1e9:.1f}B"
-        if v >= 1e6:  return f"${v/1e6:.0f}M"
-    except:
-        pass
-    return str(val)
+# ── Layout: news (left) | table (right) ──
+news_col, main_col = st.columns([1, 3], gap="large")
 
-def format_pe(val):
-    try:
-        return f"{float(val):.1f}x"
-    except:
+with news_col:
+    st.markdown('<p class="section-label">Market News</p>', unsafe_allow_html=True)
+
+    if symbols:
+        btn_cols = st.columns(min(len(symbols), 4))
+        for i, sym in enumerate(symbols[:4]):
+            with btn_cols[i % len(btn_cols)]:
+                if st.button(sym, key=f"ntab_{sym}"):
+                    st.session_state.sel_ticker = sym
+                    st.rerun()
+
+    sel = st.session_state.sel_ticker
+    if sel:
+        news_items = fetch_news(sel)
+        if news_items:
+            html = '<div class="news-panel">'
+            for item in news_items:
+                title  = item["title"].replace("<", "&lt;").replace(">", "&gt;")
+                source = item["source"].replace("<", "&lt;").replace(">", "&gt;")
+                html += f"""<div class="news-item">
+  <div class="news-source">{source}</div>
+  <a class="news-title" href="{item['link']}" target="_blank">{title}</a>
+  <div class="news-time">{item['time']}</div>
+</div>"""
+            html += "</div>"
+            st.markdown(html, unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="news-panel"><div class="no-news">ไม่พบข่าวสำหรับ ticker นี้</div></div>', unsafe_allow_html=True)
+
+with main_col:
+    st.markdown('<p class="section-label">Watchlist</p>', unsafe_allow_html=True)
+
+    def color_pct(val):
+        try:
+            v = float(val)
+            if v > 0: return "color:#16A34A; font-weight:500;"
+            if v < 0: return "color:#DC2626; font-weight:500;"
+        except: pass
+        return "color:#6B6860;"
+
+    def fmt_mcap(val):
+        try:
+            v = float(val)
+            if v >= 1e12: return f"${v/1e12:.2f}T"
+            if v >= 1e9:  return f"${v/1e9:.1f}B"
+            if v >= 1e6:  return f"${v/1e6:.0f}M"
+        except: pass
         return str(val)
 
-if not df.empty:
-    display_df = df.copy()
-    display_df["Market Cap"] = display_df["Market Cap"].apply(format_mcap)
-    display_df["P/E"]        = display_df["P/E"].apply(format_pe)
+    if not df.empty:
+        d = df.copy()
+        d["Market Cap"] = d["Market Cap"].apply(fmt_mcap)
+        d["P/E"] = d["P/E"].apply(lambda v: f"{float(v):.1f}x" if str(v).replace('.','').replace('-','').isdigit() else str(v))
 
-    styled = display_df.style.map(
-        color_pct,
-        subset=["Change %", "YTD %", "1Y %", "From High %"]
-    ).format({
-        "Price":      "${:.2f}",
-        "Change %":   "{:+.2f}%",
-        "YTD %":      "{:+.2f}%",
-        "1Y %":       "{:+.2f}%",
-        "From High %":"{:+.2f}%",
-        "52W High":   "${:.2f}",
-        "SMA 20":     "${:.2f}",
-        "SMA 50":     "${:.2f}",
-        "SMA 200":    "${:.2f}",
-    })
-
-    st.dataframe(
-        styled,
-        column_config={
-            "Trend": st.column_config.LineChartColumn(
-                "60d Trend", width="medium"
-            ),
-            "RS Rank": st.column_config.ProgressColumn(
-                "RS Rank", min_value=1, max_value=99, format="%d"
-            ),
-        },
-        use_container_width=True,
-        hide_index=True,
-        height=min(60 + len(df) * 38, 600)
-    )
-else:
-    st.markdown(
-        '<p style="color:#9E9B95; font-size:0.875rem; margin-top:1rem;">No data available. Add a symbol above to get started.</p>',
-        unsafe_allow_html=True
-    )
+        styled = d.style.map(color_pct, subset=["Change %","YTD %","1Y %","From High %"]).format({
+            "Price": "${:.2f}", "Change %": "{:+.2f}%", "YTD %": "{:+.2f}%",
+            "1Y %": "{:+.2f}%", "From High %": "{:+.2f}%",
+            "52W High": "${:.2f}", "SMA 20": "${:.2f}", "SMA 50": "${:.2f}", "SMA 200": "${:.2f}",
+        })
+        st.dataframe(
+            styled,
+            column_config={
+                "Trend":   st.column_config.LineChartColumn("60d Trend", width="medium"),
+                "RS Rank": st.column_config.ProgressColumn("RS Rank", min_value=1, max_value=99, format="%d"),
+            },
+            use_container_width=True, hide_index=True,
+            height=min(60 + len(df) * 38, 600)
+        )
+    else:
+        st.markdown('<p style="color:#9E9B95;font-size:0.875rem;margin-top:1rem;">No data — add a symbol above.</p>', unsafe_allow_html=True)
