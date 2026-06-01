@@ -194,6 +194,7 @@ def fetch_stock_data(symbol):
         pp = round(hist["Close"].iloc[-2], 2)
 
         daily = round((cp - pp) / pp * 100, 2)
+
         yr1 = round(
             (hist["Close"].iloc[-1] - hist["Close"].iloc[0])
             / hist["Close"].iloc[0] * 100,
@@ -222,12 +223,12 @@ def fetch_stock_data(symbol):
         )
 
         rs = int(min(99, max(1, 50 + mr * 2)))
+
         trend = hist["Close"].tail(60).tolist()
 
         company = symbol
         mcap = "N/A"
         pe = "N/A"
-        logo = ""
 
         try:
             info = stock.info
@@ -236,39 +237,32 @@ def fetch_stock_data(symbol):
             mcap = info.get("marketCap", "N/A")
             pe = info.get("trailingPE", "N/A")
 
-            logo = (
-                info.get("logo_url")
-                or info.get("logo")
-                or ""
-            )
-
         except:
             pass
 
-logo = f"https://logo.clearbit.com/{symbol.lower()}.com"
+        logo = f"https://logo.clearbit.com/{symbol.lower()}.com"
 
-return {
-    "Logo": logo,
-    "Ticker": symbol,
-    "Company": company,
-    "Price": cp,
-    "Change %": daily,
-    "Market Cap": mcap,
-    "P/E": pe,
-    "YTD %": ytd,
-    "Trend": trend,
-    "1Y %": yr1,
-    "52W High": h52,
-    "From High %": fh,
-    "RS Rank": rs,
-    "SMA 20": sma20,
-    "SMA 50": sma50,
-    "SMA 200": sma200,
-}        
+        return {
+            "Logo": logo,
+            "Ticker": symbol,
+            "Company": company,
+            "Price": cp,
+            "Change %": daily,
+            "Market Cap": mcap,
+            "P/E": pe,
+            "YTD %": ytd,
+            "Trend": trend,
+            "1Y %": yr1,
+            "52W High": h52,
+            "From High %": fh,
+            "RS Rank": rs,
+            "SMA 20": sma20,
+            "SMA 50": sma50,
+            "SMA 200": sma200,
+        }
 
     except:
         return None
-
 # ── Fetch news ──
 @st.cache_data(ttl=600)
 def fetch_news(ticker):
