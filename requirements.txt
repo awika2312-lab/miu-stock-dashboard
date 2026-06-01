@@ -1,10 +1,8 @@
 streamlit
 pandas
-requests
 numpy
 yfinance
 feedparser
 plotly
-lotly
 requests
 Pillow
